@@ -1,0 +1,1 @@
+No plan for .NET support for NI-CAN

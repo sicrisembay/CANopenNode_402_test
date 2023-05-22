@@ -23,19 +23,18 @@ namespace SimpleUI
         private pcan_usb pcan = null;
         private ni_usb nican = null;
         #endregion // COmmunication
+        private motor[] motors;
         #endregion // Members
 
         public SimpleTest()
         {
             InitializeComponent();
 
-            /* Vendor combobox */
-            this.cbb_vendor.Items.Clear();
-            var vendorNames = Enum.GetNames(typeof(SupportedVendor));
-            for (int i = 0; i < vendorNames.Length; i++) {
-                this.cbb_vendor.Items.Add(vendorNames[i]);
+            var motorCount = Enum.GetNames(typeof(AXLE_ID)).Length - 1;
+            this.motors = new motor[motorCount];
+            for(int i = 0; i < motorCount; i++) {
+                this.motors[i] = new motor((byte)(0x0A+i), (AXLE_ID)i);
             }
-            this.cbb_vendor.SelectedIndex = 0;
 
             this.pcan = new pcan_usb();
             this.nican = new ni_usb();
@@ -51,6 +50,22 @@ namespace SimpleUI
                 PCANBasic.PCAN_USBBUS8,
             };
 
+            /* Vendor combobox */
+            this.cbb_vendor.Items.Clear();
+            var vendorNames = Enum.GetNames(typeof(SupportedVendor));
+            for (int i = 0; i < vendorNames.Length; i++) {
+                this.cbb_vendor.Items.Add(vendorNames[i]);
+            }
+            this.cbb_vendor.SelectedIndex = 1;
+
+            /* Modes of Operation */
+            this.cbb_ModeOfOperation.Items.Clear();
+            var modesNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
+            for(int i = 0; i < modesNames.Length; i++) {
+                this.cbb_ModeOfOperation.Items.Add(modesNames[i]);
+            }
+            this.cbb_ModeOfOperation.SelectedIndex = 1;
+
             this.set_obj_states(false);
         }
 
@@ -65,6 +80,8 @@ namespace SimpleUI
             this.btn_HwRefresh.Enabled = !connected;
             this.btn_initialize.Enabled = !connected;
             this.btn_release.Enabled = connected;
+
+            this.groupBox_MotorOne.Enabled = connected;
         }
 
         #endregion
@@ -152,12 +169,22 @@ namespace SimpleUI
                 switch ((SupportedVendor)cbb_vendor.SelectedIndex) {
                     case SupportedVendor.NI_XNET: {
                         if (this.nican.Connect(cbb_channel.Text, Convert.ToUInt32(cbb_baudrates.Text))) {
+                            for (int i = 0; i < this.motors.Length; i++) {
+                                this.motors[i].SetDevice(ref this.nican);
+                                this.nican.CanRxMsgEvent += this.motors[i].TpdoHandler;
+                                this.motors[i].ResetComm();
+                            }
                             this.set_obj_states(true);
                         }
                         break;
                     }
                     case SupportedVendor.PEAK: {
                         if (this.pcan.Connect(this.m_PcanHandle, this.m_BaudRate)) {
+                            for(int i = 0; i < this.motors.Length; i++) {
+                                this.motors[i].SetDevice(ref this.pcan);
+                                this.pcan.CanRxMsgEvent += this.motors[i].TpdoHandler;
+                                this.motors[i].ResetComm();
+                            }
                             this.set_obj_states(true);
                         }
                         break;
@@ -175,10 +202,103 @@ namespace SimpleUI
         {
             this.pcan.Disconnect();
             this.nican.Disconnect();
+            for(int i = 0; i < this.motors.Length; i++) {
+                this.pcan.CanRxMsgEvent -= this.motors[i].TpdoHandler;
+                this.nican.CanRxMsgEvent -= this.motors[i].TpdoHandler;
+            }
             this.set_obj_states(false);
         }
 
+        private void button_ResetNodes_Click(object sender, EventArgs e)
+        {
+            this.motors[0].ResetNode();
+        }
+
+        private void button_ResetComms_Click(object sender, EventArgs e)
+        {
+            this.pcan.SendStandard(0, new byte[] { 0x82, 0x00 });
+        }
+
+        private void button_ReadyMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].Ready();
+        }
+
+        private void button_SwitchOnMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].SwitchOn();
+        }
+
+        private void button_SwitchOffMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].SwitchOff();
+        }
+
+        private void button_EnableMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].EnableOperation();
+        }
+
+        private void button_DisableMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].DisableOperation();
+        }
+
+        private void button_SetMode_Click(object sender, EventArgs e)
+        {
+            MODE_OF_OPERATION mode = MODE_OF_OPERATION.RESERVED;
+            var modeNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
+            switch (modeNames[cbb_ModeOfOperation.SelectedIndex]) {
+                case "PROFILE_VELOCITY": {
+                    mode = MODE_OF_OPERATION.PROFILE_VELOCITY;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            this.motors[0].SetModeOfOperation(mode);
+
+        }
+
+        private void button_setTargetVelocity_Click(object sender, EventArgs e)
+        {
+            try {
+                this.motors[0].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocity.Text));
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+        }
         #endregion  // Button Event
+
         #endregion  // Methods
+
+        private void timer_update_Tick(object sender, EventArgs e)
+        {
+            if(this.motors[0].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocity.Enabled = true;
+            } else {
+                groupBox_ProfileVelocity.Enabled = false;
+                textBox_targetVelocity.Text = "0";
+            }
+
+            if(this.motors[0].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorOne.Enabled = true;
+            } else {
+                button_clearFaultMotorOne.Enabled = false;
+            }
+
+            this.label_stateMotorOne.Text = "State: " + this.motors[0].state.ToString();
+            this.label_ModeOfOperation.Text = "Mode: " + ((MODE_OF_OPERATION) this.motors[0].mode).ToString();
+            this.label_dcLinkMotorOne.Text = "DC Link: " + ( this.motors[0].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorOne.Text = "Position: " + this.motors[0].PositionActualValue;
+            this.label_actualSpeedMotorOne.Text = "Speed: " + this.motors[0].VelocityActualValue;
+            this.label_actualCurrentMotorOne.Text = "Current: " + ( this.motors[0].CurrentActualValue / 1000.0f ).ToString("0.000");
+        }
+
+        private void button_clearFaultMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].ClearFault();
+        }
     }
 }

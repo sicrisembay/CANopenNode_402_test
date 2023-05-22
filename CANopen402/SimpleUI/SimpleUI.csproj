@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="pdo402.cs" />
     <Compile Include="SimpleTest.cs">
       <SubType>Form</SubType>
     </Compile>

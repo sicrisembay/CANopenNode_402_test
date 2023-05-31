@@ -59,12 +59,18 @@ namespace SimpleUI
             this.cbb_vendor.SelectedIndex = 1;
 
             /* Modes of Operation */
-            this.cbb_ModeOfOperation.Items.Clear();
+            this.cbb_ModeOfOperationOne.Items.Clear();
+            this.cbb_ModeOfOperationTwo.Items.Clear();
+            this.cbb_ModeOfOperationThree.Items.Clear();
             var modesNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
             for(int i = 0; i < modesNames.Length; i++) {
-                this.cbb_ModeOfOperation.Items.Add(modesNames[i]);
+                this.cbb_ModeOfOperationOne.Items.Add(modesNames[i]);
+                this.cbb_ModeOfOperationTwo.Items.Add(modesNames[i]);
+                this.cbb_ModeOfOperationThree.Items.Add(modesNames[i]);
             }
-            this.cbb_ModeOfOperation.SelectedIndex = 1;
+            this.cbb_ModeOfOperationOne.SelectedIndex = 1;
+            this.cbb_ModeOfOperationTwo.SelectedIndex = 1;
+            this.cbb_ModeOfOperationThree.SelectedIndex = 1;
 
             this.set_obj_states(false);
         }
@@ -82,6 +88,8 @@ namespace SimpleUI
             this.btn_release.Enabled = connected;
 
             this.groupBox_MotorOne.Enabled = connected;
+            this.groupBox_MotorTwo.Enabled = connected;
+            this.groupBox_MotorThree.Enabled = connected;
         }
 
         #endregion
@@ -111,6 +119,7 @@ namespace SimpleUI
 
         #endregion // ComboBox Event
         #region Button Event
+        #region General
         private void btn_HwRefresh_Click(object sender, EventArgs e)
         {
             cbb_channel.Items.Clear();
@@ -209,14 +218,16 @@ namespace SimpleUI
             this.set_obj_states(false);
         }
 
-        private void button_ResetNodes_Click(object sender, EventArgs e)
+        #endregion // General
+        #region Motor One
+        private void button_ResetNodeOne_Click(object sender, EventArgs e)
         {
             this.motors[0].ResetNode();
         }
 
-        private void button_ResetComms_Click(object sender, EventArgs e)
+        private void button_ResetCommOne_Click(object sender, EventArgs e)
         {
-            this.pcan.SendStandard(0, new byte[] { 0x82, 0x00 });
+            this.motors[0].ResetComm();
         }
 
         private void button_ReadyMotorOne_Click(object sender, EventArgs e)
@@ -244,11 +255,11 @@ namespace SimpleUI
             this.motors[0].DisableOperation();
         }
 
-        private void button_SetMode_Click(object sender, EventArgs e)
+        private void button_SetModeOne_Click(object sender, EventArgs e)
         {
             MODE_OF_OPERATION mode = MODE_OF_OPERATION.RESERVED;
             var modeNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
-            switch (modeNames[cbb_ModeOfOperation.SelectedIndex]) {
+            switch (modeNames[cbb_ModeOfOperationOne.SelectedIndex]) {
                 case "PROFILE_VELOCITY": {
                     mode = MODE_OF_OPERATION.PROFILE_VELOCITY;
                     break;
@@ -261,25 +272,102 @@ namespace SimpleUI
 
         }
 
-        private void button_setTargetVelocity_Click(object sender, EventArgs e)
+        private void button_setTargetVelocityOne_Click(object sender, EventArgs e)
         {
             try {
-                this.motors[0].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocity.Text));
+                this.motors[0].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocityOne.Text));
             } catch (Exception ex) {
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void button_clearFaultMotorOne_Click(object sender, EventArgs e)
+        {
+            this.motors[0].ClearFault();
+        }
+        #endregion  // Motor One
+
+        #region Motor Two
+        private void button_ResetNodeTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].ResetNode();
+        }
+
+        private void button_ResetCommTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].ResetComm();
+        }
+
+        private void button_ReadyMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].Ready();
+        }
+
+        private void button_SwitchOnMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].SwitchOn();
+        }
+
+        private void button_SwitchOffMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].SwitchOff();
+        }
+
+        private void button_EnableMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].EnableOperation();
+        }
+
+        private void button_DisableMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].DisableOperation();
+        }
+
+        private void button_SetModeTwo_Click(object sender, EventArgs e)
+        {
+            MODE_OF_OPERATION mode = MODE_OF_OPERATION.RESERVED;
+            var modeNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
+            switch (modeNames[cbb_ModeOfOperationTwo.SelectedIndex]) {
+                case "PROFILE_VELOCITY": {
+                    mode = MODE_OF_OPERATION.PROFILE_VELOCITY;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            this.motors[1].SetModeOfOperation(mode);
+        }
+
+        private void button_clearFaultMotorTwo_Click(object sender, EventArgs e)
+        {
+            this.motors[1].ClearFault();
+        }
+
+        private void button_setTargetVelocityTwo_Click(object sender, EventArgs e)
+        {
+            try {
+                this.motors[1].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocityTwo.Text));
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+        #endregion  // Motor Two
         #endregion  // Button Event
 
         #endregion  // Methods
 
         private void timer_update_Tick(object sender, EventArgs e)
         {
+            /*
+             * AXLE 1 Update
+             */
             if(this.motors[0].state == DEVICE_STATE.OPERATION_ENABLE) {
-                groupBox_ProfileVelocity.Enabled = true;
+                groupBox_ProfileVelocityOne.Enabled = true;
             } else {
-                groupBox_ProfileVelocity.Enabled = false;
-                textBox_targetVelocity.Text = "0";
+                groupBox_ProfileVelocityOne.Enabled = false;
+                textBox_targetVelocityOne.Text = "0";
             }
 
             if(this.motors[0].state == DEVICE_STATE.FAULT) {
@@ -289,16 +377,122 @@ namespace SimpleUI
             }
 
             this.label_stateMotorOne.Text = "State: " + this.motors[0].state.ToString();
-            this.label_ModeOfOperation.Text = "Mode: " + ((MODE_OF_OPERATION) this.motors[0].mode).ToString();
+            this.label_ModeOfOperationOne.Text = "Mode: " + ((MODE_OF_OPERATION) this.motors[0].mode).ToString();
             this.label_dcLinkMotorOne.Text = "DC Link: " + ( this.motors[0].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
             this.label_actualPositionMotorOne.Text = "Position: " + this.motors[0].PositionActualValue;
             this.label_actualSpeedMotorOne.Text = "Speed: " + this.motors[0].VelocityActualValue;
             this.label_actualCurrentMotorOne.Text = "Current: " + ( this.motors[0].CurrentActualValue / 1000.0f ).ToString("0.000");
+
+            /*
+             * AXLE 2 Update
+             */
+            if (this.motors[1].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocityTwo.Enabled = true;
+            } else {
+                groupBox_ProfileVelocityTwo.Enabled = false;
+                textBox_targetVelocityTwo.Text = "0";
+            }
+
+            if (this.motors[1].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorTwo.Enabled = true;
+            } else {
+                button_clearFaultMotorTwo.Enabled = false;
+            }
+
+            this.label_stateMotorTwo.Text = "State: " + this.motors[1].state.ToString();
+            this.label_ModeOfOperationTwo.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[1].mode ).ToString();
+            this.label_dcLinkMotorTwo.Text = "DC Link: " + ( this.motors[1].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorTwo.Text = "Position: " + this.motors[1].PositionActualValue;
+            this.label_actualSpeedMotorTwo.Text = "Speed: " + this.motors[1].VelocityActualValue;
+            this.label_actualCurrentMotorTwo.Text = "Current: " + ( this.motors[1].CurrentActualValue / 1000.0f ).ToString("0.000");
+
+            /*
+             * AXLE 3 Update
+             */
+            if (this.motors[2].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocityThree.Enabled = true;
+            } else {
+                groupBox_ProfileVelocityThree.Enabled = false;
+                textBox_targetVelocityThree.Text = "0";
+            }
+
+            if (this.motors[2].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorThree.Enabled = true;
+            } else {
+                button_clearFaultMotorThree.Enabled = false;
+            }
+
+            this.label_stateMotorThree.Text = "State: " + this.motors[2].state.ToString();
+            this.label_ModeOfOperationThree.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[2].mode ).ToString();
+            this.label_dcLinkMotorThree.Text = "DC Link: " + ( this.motors[2].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorThree.Text = "Position: " + this.motors[2].PositionActualValue;
+            this.label_actualSpeedMotorThree.Text = "Speed: " + this.motors[2].VelocityActualValue;
+            this.label_actualCurrentMotorThree.Text = "Current: " + ( this.motors[2].CurrentActualValue / 1000.0f ).ToString("0.000");
         }
 
-        private void button_clearFaultMotorOne_Click(object sender, EventArgs e)
+        private void button_ResetNodeThree_Click(object sender, EventArgs e)
         {
-            this.motors[0].ClearFault();
+            this.motors[2].ResetNode();
+        }
+
+        private void button_ResetCommThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].ResetComm();
+        }
+
+        private void button_ReadyMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].Ready();
+        }
+
+        private void button_SwitchOnMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].SwitchOn();
+        }
+
+        private void button_SwitchOffMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].SwitchOff();
+        }
+
+        private void button_EnableMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].EnableOperation();
+        }
+
+        private void button_DisableMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].DisableOperation();
+        }
+
+        private void button_SetModeThree_Click(object sender, EventArgs e)
+        {
+            MODE_OF_OPERATION mode = MODE_OF_OPERATION.RESERVED;
+            var modeNames = Enum.GetNames(typeof(MODE_OF_OPERATION));
+            switch (modeNames[cbb_ModeOfOperationThree.SelectedIndex]) {
+                case "PROFILE_VELOCITY": {
+                    mode = MODE_OF_OPERATION.PROFILE_VELOCITY;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            this.motors[2].SetModeOfOperation(mode);
+        }
+
+        private void button_clearFaultMotorThree_Click(object sender, EventArgs e)
+        {
+            this.motors[2].ClearFault();
+        }
+
+        private void button_setTargetVelocityThree_Click(object sender, EventArgs e)
+        {
+            try {
+                this.motors[2].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocityThree.Text));
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }

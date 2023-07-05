@@ -39,6 +39,40 @@ namespace SimpleUI
         PROFILE_VELOCITY = 0x03
     }
 
+    public class TimeValuePair
+    {
+        private List<DateTime> timeStamp;
+        private List<double> value;
+
+        public TimeValuePair()
+        {
+            this.timeStamp = new List<DateTime>();
+            this.value = new List<double>();
+        }
+
+        public void Add(DateTime time, double value)
+        {
+            this.timeStamp.Add(time);
+            this.value.Add(value);
+        }
+
+        public DateTime[] GetTime()
+        {
+            return ( this.timeStamp.ToArray() );
+        }
+
+        public double[] GetValue()
+        {
+            return ( this.value.ToArray() );
+        }
+
+        public void Clear()
+        {
+            this.timeStamp.Clear();
+            this.value.Clear();
+        }
+    }
+
     class motor
     {
         #region Member
@@ -57,6 +91,12 @@ namespace SimpleUI
         public Int16 TorqueActualValue { get; private set; }
         public Int16 CurrentActualValue { get; private set; }
         public UInt32 DcLinkCircuitVoltage { get; private set; }
+        public double temperature { get; private set; }
+        public TimeValuePair position { get; private set; }
+        public TimeValuePair speed { get; private set; }
+        public TimeValuePair current { get; private set; }
+        public TimeValuePair tempC { get; private set; }
+
         #endregion // Member
 
         public motor(byte nodeId, AXLE_ID id)
@@ -67,6 +107,10 @@ namespace SimpleUI
             this.nodeId = nodeId;
             this.initCobId(id);
             this.controlStatus = 0;
+            this.position = new TimeValuePair();
+            this.speed = new TimeValuePair();
+            this.current = new TimeValuePair();
+            this.tempC = new TimeValuePair();
         }
         public void SetDevice(ref ni_usb device)
         {
@@ -185,47 +229,52 @@ namespace SimpleUI
             if((e.msgId >= this.tpdo_cobId_base) &&
                (e.msgId < (this.tpdo_cobId_base + TPDO_MAX_COUNT))) {
                 var tpdo = e.msgId + 1 - this.tpdo_cobId_base;
-                /* Refer to Object Dictionary for Details */
-                switch(tpdo) {
-                    case 1: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        break;
-                    }
-                    case 2: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        this.mode = e.data[2];
-                        break;
-                    }
-                    case 3: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        this.PositionActualValue = BitConverter.ToInt32(e.data, 2);
-                        break;
-                    }
-                    case 4: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        this.VelocityActualValue = BitConverter.ToInt32(e.data, 2);
-                        break;
-                    }
-                    case 5: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        this.TorqueActualValue = BitConverter.ToInt16(e.data, 2);
-                        break;
-                    }
-                    case 8: {
-                        this.statusWord = BitConverter.ToUInt16(e.data, 0);
-                        this.updateState();
-                        this.CurrentActualValue = BitConverter.ToInt16(e.data, 2);
-                        this.DcLinkCircuitVoltage = BitConverter.ToUInt32(e.data, 4);
-                        break;
-                    }
-                    default: {
-                        Console.WriteLine("Unknown TPDO" + tpdo);
-                        break;
+                lock (this) {
+                    /* Refer to Object Dictionary for Details */
+                    switch (tpdo) {
+                        case 1: {
+                            this.statusWord = BitConverter.ToUInt16(e.data, 0);
+                            this.updateState();
+                            break;
+                        }
+                        case 2: {
+                            this.statusWord = BitConverter.ToUInt16(e.data, 0);
+                            this.updateState();
+                            this.mode = e.data[2];
+                            break;
+                        }
+                        case 3: {
+                            this.statusWord = BitConverter.ToUInt16(e.data, 0);
+                            this.updateState();
+                            this.PositionActualValue = BitConverter.ToInt32(e.data, 2);
+                            this.position.Add(DateTime.Now, Convert.ToDouble(this.PositionActualValue));
+                            break;
+                        }
+                        case 4: {
+                            this.statusWord = BitConverter.ToUInt16(e.data, 0);
+                            this.updateState();
+                            this.VelocityActualValue = BitConverter.ToInt32(e.data, 2);
+                            this.speed.Add(DateTime.Now, Convert.ToDouble(this.VelocityActualValue));
+                            break;
+                        }
+                        case 5: {
+                            this.statusWord = BitConverter.ToUInt16(e.data, 0);
+                            this.updateState();
+                            this.TorqueActualValue = BitConverter.ToInt16(e.data, 2);
+                            break;
+                        }
+                        case 8: {
+                            this.temperature = Convert.ToDouble(BitConverter.ToUInt16(e.data, 0)) / 10.0;
+                            this.CurrentActualValue = BitConverter.ToInt16(e.data, 2);
+                            this.DcLinkCircuitVoltage = BitConverter.ToUInt32(e.data, 4);
+                            this.tempC.Add(DateTime.Now, Convert.ToDouble(this.temperature));
+                            this.current.Add(DateTime.Now, Convert.ToDouble(this.CurrentActualValue));
+                            break;
+                        }
+                        default: {
+                            Console.WriteLine("Unknown TPDO" + tpdo);
+                            break;
+                        }
                     }
                 }
             }

@@ -24,6 +24,9 @@ namespace SimpleUI
         private ni_usb nican = null;
         #endregion // COmmunication
         private motor[] motors;
+        #region Plot
+
+        #endregion
         #endregion // Members
 
         public SimpleTest()
@@ -93,6 +96,7 @@ namespace SimpleUI
         }
 
         #endregion
+
         #region ComboBox Event
         private void cbb_channel_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -118,6 +122,7 @@ namespace SimpleUI
         }
 
         #endregion // ComboBox Event
+
         #region Button Event
         #region General
         private void btn_HwRefresh_Click(object sender, EventArgs e)
@@ -286,7 +291,6 @@ namespace SimpleUI
             this.motors[0].ClearFault();
         }
         #endregion  // Motor One
-
         #region Motor Two
         private void button_ResetNodeTwo_Click(object sender, EventArgs e)
         {
@@ -354,82 +358,7 @@ namespace SimpleUI
 
         }
         #endregion  // Motor Two
-        #endregion  // Button Event
-
-        #endregion  // Methods
-
-        private void timer_update_Tick(object sender, EventArgs e)
-        {
-            /*
-             * AXLE 1 Update
-             */
-            if(this.motors[0].state == DEVICE_STATE.OPERATION_ENABLE) {
-                groupBox_ProfileVelocityOne.Enabled = true;
-            } else {
-                groupBox_ProfileVelocityOne.Enabled = false;
-                textBox_targetVelocityOne.Text = "0";
-            }
-
-            if(this.motors[0].state == DEVICE_STATE.FAULT) {
-                button_clearFaultMotorOne.Enabled = true;
-            } else {
-                button_clearFaultMotorOne.Enabled = false;
-            }
-
-            this.label_stateMotorOne.Text = "State: " + this.motors[0].state.ToString();
-            this.label_ModeOfOperationOne.Text = "Mode: " + ((MODE_OF_OPERATION) this.motors[0].mode).ToString();
-            this.label_dcLinkMotorOne.Text = "DC Link: " + ( this.motors[0].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
-            this.label_actualPositionMotorOne.Text = "Position: " + this.motors[0].PositionActualValue;
-            this.label_actualSpeedMotorOne.Text = "Speed: " + this.motors[0].VelocityActualValue;
-            this.label_actualCurrentMotorOne.Text = "Current: " + ( this.motors[0].CurrentActualValue / 1000.0f ).ToString("0.000");
-
-            /*
-             * AXLE 2 Update
-             */
-            if (this.motors[1].state == DEVICE_STATE.OPERATION_ENABLE) {
-                groupBox_ProfileVelocityTwo.Enabled = true;
-            } else {
-                groupBox_ProfileVelocityTwo.Enabled = false;
-                textBox_targetVelocityTwo.Text = "0";
-            }
-
-            if (this.motors[1].state == DEVICE_STATE.FAULT) {
-                button_clearFaultMotorTwo.Enabled = true;
-            } else {
-                button_clearFaultMotorTwo.Enabled = false;
-            }
-
-            this.label_stateMotorTwo.Text = "State: " + this.motors[1].state.ToString();
-            this.label_ModeOfOperationTwo.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[1].mode ).ToString();
-            this.label_dcLinkMotorTwo.Text = "DC Link: " + ( this.motors[1].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
-            this.label_actualPositionMotorTwo.Text = "Position: " + this.motors[1].PositionActualValue;
-            this.label_actualSpeedMotorTwo.Text = "Speed: " + this.motors[1].VelocityActualValue;
-            this.label_actualCurrentMotorTwo.Text = "Current: " + ( this.motors[1].CurrentActualValue / 1000.0f ).ToString("0.000");
-
-            /*
-             * AXLE 3 Update
-             */
-            if (this.motors[2].state == DEVICE_STATE.OPERATION_ENABLE) {
-                groupBox_ProfileVelocityThree.Enabled = true;
-            } else {
-                groupBox_ProfileVelocityThree.Enabled = false;
-                textBox_targetVelocityThree.Text = "0";
-            }
-
-            if (this.motors[2].state == DEVICE_STATE.FAULT) {
-                button_clearFaultMotorThree.Enabled = true;
-            } else {
-                button_clearFaultMotorThree.Enabled = false;
-            }
-
-            this.label_stateMotorThree.Text = "State: " + this.motors[2].state.ToString();
-            this.label_ModeOfOperationThree.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[2].mode ).ToString();
-            this.label_dcLinkMotorThree.Text = "DC Link: " + ( this.motors[2].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
-            this.label_actualPositionMotorThree.Text = "Position: " + this.motors[2].PositionActualValue;
-            this.label_actualSpeedMotorThree.Text = "Speed: " + this.motors[2].VelocityActualValue;
-            this.label_actualCurrentMotorThree.Text = "Current: " + ( this.motors[2].CurrentActualValue / 1000.0f ).ToString("0.000");
-        }
-
+        #region Motor Three
         private void button_ResetNodeThree_Click(object sender, EventArgs e)
         {
             this.motors[2].ResetNode();
@@ -492,6 +421,131 @@ namespace SimpleUI
                 this.motors[2].SetTargetVelocity(Convert.ToInt32(textBox_targetVelocityThree.Text));
             } catch (Exception ex) {
                 MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion // Motor Three
+        #endregion  // Button Event
+
+        #region Timer Event
+        private void timer_update_Tick(object sender, EventArgs e)
+        {
+            this.Plot();
+
+            /*
+             * AXLE 1 Update
+             */
+            if (this.motors[0].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocityOne.Enabled = true;
+            } else {
+                groupBox_ProfileVelocityOne.Enabled = false;
+                textBox_targetVelocityOne.Text = "0";
+            }
+
+            if (this.motors[0].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorOne.Enabled = true;
+            } else {
+                button_clearFaultMotorOne.Enabled = false;
+            }
+
+            this.label_stateMotorOne.Text = "State: " + this.motors[0].state.ToString();
+            this.label_ModeOfOperationOne.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[0].mode ).ToString();
+            this.label_dcLinkMotorOne.Text = "DC Link: " + ( this.motors[0].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorOne.Text = "Position: " + this.motors[0].PositionActualValue;
+            this.label_actualSpeedMotorOne.Text = "Speed: " + this.motors[0].VelocityActualValue;
+            this.label_actualCurrentMotorOne.Text = "Current: " + ( this.motors[0].CurrentActualValue / 1000.0f ).ToString("0.000");
+            this.label_temperatureMotorOne.Text = "Temp: " + this.motors[0].temperature.ToString("0.0");
+            /*
+             * AXLE 2 Update
+             */
+            if (this.motors[1].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocityTwo.Enabled = true;
+            } else {
+                groupBox_ProfileVelocityTwo.Enabled = false;
+                textBox_targetVelocityTwo.Text = "0";
+            }
+
+            if (this.motors[1].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorTwo.Enabled = true;
+            } else {
+                button_clearFaultMotorTwo.Enabled = false;
+            }
+
+            this.label_stateMotorTwo.Text = "State: " + this.motors[1].state.ToString();
+            this.label_ModeOfOperationTwo.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[1].mode ).ToString();
+            this.label_dcLinkMotorTwo.Text = "DC Link: " + ( this.motors[1].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorTwo.Text = "Position: " + this.motors[1].PositionActualValue;
+            this.label_actualSpeedMotorTwo.Text = "Speed: " + this.motors[1].VelocityActualValue;
+            this.label_actualCurrentMotorTwo.Text = "Current: " + ( this.motors[1].CurrentActualValue / 1000.0f ).ToString("0.000");
+
+            /*
+             * AXLE 3 Update
+             */
+            if (this.motors[2].state == DEVICE_STATE.OPERATION_ENABLE) {
+                groupBox_ProfileVelocityThree.Enabled = true;
+            } else {
+                groupBox_ProfileVelocityThree.Enabled = false;
+                textBox_targetVelocityThree.Text = "0";
+            }
+
+            if (this.motors[2].state == DEVICE_STATE.FAULT) {
+                button_clearFaultMotorThree.Enabled = true;
+            } else {
+                button_clearFaultMotorThree.Enabled = false;
+            }
+
+            this.label_stateMotorThree.Text = "State: " + this.motors[2].state.ToString();
+            this.label_ModeOfOperationThree.Text = "Mode: " + ( (MODE_OF_OPERATION)this.motors[2].mode ).ToString();
+            this.label_dcLinkMotorThree.Text = "DC Link: " + ( this.motors[2].DcLinkCircuitVoltage / 1000.0f ).ToString("0.0");
+            this.label_actualPositionMotorThree.Text = "Position: " + this.motors[2].PositionActualValue;
+            this.label_actualSpeedMotorThree.Text = "Speed: " + this.motors[2].VelocityActualValue;
+            this.label_actualCurrentMotorThree.Text = "Current: " + ( this.motors[2].CurrentActualValue / 1000.0f ).ToString("0.000");
+        }
+        #endregion // Timer Event
+
+        #region Plotting
+        private void Plot()
+        {
+            double[] position;
+            double[] speed;
+            double[] current;
+            double[] temperature;
+            /*
+             * AXLE 1 Plot
+             */
+            if (!this.checkBox_plotPauseOne.Checked) {
+                this.formsPlot_MotorOne.Plot.Clear();
+                lock (this.motors[0]) {
+                    position = this.motors[0].position.GetValue();
+                    speed = this.motors[0].speed.GetValue();
+                    current = this.motors[0].current.GetValue();
+                    temperature = this.motors[0].tempC.GetValue();
+                }
+                if (( this.checkBox_PositionMotorOne.Checked ) && ( position.Length > 0 )) {
+                    this.formsPlot_MotorOne.Plot.AddSignal(position, label: "Rev");
+                }
+                if (( this.checkBox_SpeedMotorOne.Checked ) && ( speed.Length > 0 )) {
+                    this.formsPlot_MotorOne.Plot.AddSignal(speed, label: "Speed");
+                }
+                if (( this.checkBox_CurrentMotorOne.Checked ) && ( current.Length > 0 )) {
+                    this.formsPlot_MotorOne.Plot.AddSignal(current, label: "Current");
+                }
+                if (( this.checkBox_TempMotorOne.Checked ) && ( temperature.Length > 0 )) {
+                    this.formsPlot_MotorOne.Plot.AddSignal(temperature, label: "Temperature");
+                }
+                this.formsPlot_MotorOne.Refresh();
+            }
+        }
+        #endregion
+
+        #endregion  // Methods
+
+        private void button_clearPlotOne_Click(object sender, EventArgs e)
+        {
+            lock(this.motors[0]) {
+                this.motors[0].position.Clear();
+                this.motors[0].speed.Clear();
+                this.motors[0].current.Clear();
+                this.motors[0].tempC.Clear();
             }
         }
     }

@@ -56,6 +56,7 @@ namespace SimpleUI
             this.button_setTargetVelocityOne = new System.Windows.Forms.Button();
             this.groupBox_MotorOne = new System.Windows.Forms.GroupBox();
             this.button_clearFaultMotorOne = new System.Windows.Forms.Button();
+            this.label_temperatureMotorOne = new System.Windows.Forms.Label();
             this.label_actualCurrentMotorOne = new System.Windows.Forms.Label();
             this.label_actualPositionMotorOne = new System.Windows.Forms.Label();
             this.label_actualSpeedMotorOne = new System.Windows.Forms.Label();
@@ -103,6 +104,18 @@ namespace SimpleUI
             this.button_EnableMotorThree = new System.Windows.Forms.Button();
             this.button_SwitchOnMotorThree = new System.Windows.Forms.Button();
             this.button_ReadyMotorThree = new System.Windows.Forms.Button();
+            this.tabMain = new System.Windows.Forms.TabControl();
+            this.tabAxle1 = new System.Windows.Forms.TabPage();
+            this.tabAxle2 = new System.Windows.Forms.TabPage();
+            this.tabAxle3 = new System.Windows.Forms.TabPage();
+            this.formsPlot_MotorOne = new ScottPlot.FormsPlot();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox_PositionMotorOne = new System.Windows.Forms.CheckBox();
+            this.checkBox_SpeedMotorOne = new System.Windows.Forms.CheckBox();
+            this.checkBox_CurrentMotorOne = new System.Windows.Forms.CheckBox();
+            this.checkBox_TempMotorOne = new System.Windows.Forms.CheckBox();
+            this.checkBox_plotPauseOne = new System.Windows.Forms.CheckBox();
+            this.button_clearPlotOne = new System.Windows.Forms.Button();
             this.groupBox_connection.SuspendLayout();
             this.groupBox_MotorOne.SuspendLayout();
             this.groupBox_ProfileVelocityOne.SuspendLayout();
@@ -110,6 +123,11 @@ namespace SimpleUI
             this.groupBox_ProfileVelocityTwo.SuspendLayout();
             this.groupBox_MotorThree.SuspendLayout();
             this.groupBox_ProfileVelocityThree.SuspendLayout();
+            this.tabMain.SuspendLayout();
+            this.tabAxle1.SuspendLayout();
+            this.tabAxle2.SuspendLayout();
+            this.tabAxle3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox_connection
@@ -127,7 +145,7 @@ namespace SimpleUI
             this.groupBox_connection.Controls.Add(this.label2);
             this.groupBox_connection.Location = new System.Drawing.Point(12, 12);
             this.groupBox_connection.Name = "groupBox_connection";
-            this.groupBox_connection.Size = new System.Drawing.Size(1115, 77);
+            this.groupBox_connection.Size = new System.Drawing.Size(1037, 77);
             this.groupBox_connection.TabIndex = 48;
             this.groupBox_connection.TabStop = false;
             this.groupBox_connection.Text = "Connection";
@@ -361,6 +379,7 @@ namespace SimpleUI
             // groupBox_MotorOne
             // 
             this.groupBox_MotorOne.Controls.Add(this.button_clearFaultMotorOne);
+            this.groupBox_MotorOne.Controls.Add(this.label_temperatureMotorOne);
             this.groupBox_MotorOne.Controls.Add(this.label_actualCurrentMotorOne);
             this.groupBox_MotorOne.Controls.Add(this.label_actualPositionMotorOne);
             this.groupBox_MotorOne.Controls.Add(this.label_actualSpeedMotorOne);
@@ -378,7 +397,7 @@ namespace SimpleUI
             this.groupBox_MotorOne.Controls.Add(this.button_SwitchOnMotorOne);
             this.groupBox_MotorOne.Controls.Add(this.button_ReadyMotorOne);
             this.groupBox_MotorOne.Enabled = false;
-            this.groupBox_MotorOne.Location = new System.Drawing.Point(12, 95);
+            this.groupBox_MotorOne.Location = new System.Drawing.Point(20, 21);
             this.groupBox_MotorOne.Name = "groupBox_MotorOne";
             this.groupBox_MotorOne.Size = new System.Drawing.Size(354, 350);
             this.groupBox_MotorOne.TabIndex = 55;
@@ -394,6 +413,15 @@ namespace SimpleUI
             this.button_clearFaultMotorOne.Text = "Clear Fault";
             this.button_clearFaultMotorOne.UseVisualStyleBackColor = true;
             this.button_clearFaultMotorOne.Click += new System.EventHandler(this.button_clearFaultMotorOne_Click);
+            // 
+            // label_temperatureMotorOne
+            // 
+            this.label_temperatureMotorOne.AutoSize = true;
+            this.label_temperatureMotorOne.Location = new System.Drawing.Point(20, 309);
+            this.label_temperatureMotorOne.Name = "label_temperatureMotorOne";
+            this.label_temperatureMotorOne.Size = new System.Drawing.Size(46, 13);
+            this.label_temperatureMotorOne.TabIndex = 54;
+            this.label_temperatureMotorOne.Text = "Temp: --";
             // 
             // label_actualCurrentMotorOne
             // 
@@ -464,7 +492,7 @@ namespace SimpleUI
             this.groupBox_MotorTwo.Controls.Add(this.button_SwitchOnMotorTwo);
             this.groupBox_MotorTwo.Controls.Add(this.button_ReadyMotorTwo);
             this.groupBox_MotorTwo.Enabled = false;
-            this.groupBox_MotorTwo.Location = new System.Drawing.Point(382, 95);
+            this.groupBox_MotorTwo.Location = new System.Drawing.Point(23, 29);
             this.groupBox_MotorTwo.Name = "groupBox_MotorTwo";
             this.groupBox_MotorTwo.Size = new System.Drawing.Size(354, 350);
             this.groupBox_MotorTwo.TabIndex = 55;
@@ -684,7 +712,7 @@ namespace SimpleUI
             this.groupBox_MotorThree.Controls.Add(this.button_SwitchOnMotorThree);
             this.groupBox_MotorThree.Controls.Add(this.button_ReadyMotorThree);
             this.groupBox_MotorThree.Enabled = false;
-            this.groupBox_MotorThree.Location = new System.Drawing.Point(752, 95);
+            this.groupBox_MotorThree.Location = new System.Drawing.Point(22, 29);
             this.groupBox_MotorThree.Name = "groupBox_MotorThree";
             this.groupBox_MotorThree.Size = new System.Drawing.Size(354, 350);
             this.groupBox_MotorThree.TabIndex = 55;
@@ -884,14 +912,153 @@ namespace SimpleUI
             this.button_ReadyMotorThree.UseVisualStyleBackColor = true;
             this.button_ReadyMotorThree.Click += new System.EventHandler(this.button_ReadyMotorThree_Click);
             // 
+            // tabMain
+            // 
+            this.tabMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabMain.Controls.Add(this.tabAxle1);
+            this.tabMain.Controls.Add(this.tabAxle2);
+            this.tabMain.Controls.Add(this.tabAxle3);
+            this.tabMain.Location = new System.Drawing.Point(12, 95);
+            this.tabMain.Name = "tabMain";
+            this.tabMain.SelectedIndex = 0;
+            this.tabMain.Size = new System.Drawing.Size(1037, 488);
+            this.tabMain.TabIndex = 56;
+            // 
+            // tabAxle1
+            // 
+            this.tabAxle1.Controls.Add(this.button_clearPlotOne);
+            this.tabAxle1.Controls.Add(this.checkBox_plotPauseOne);
+            this.tabAxle1.Controls.Add(this.groupBox1);
+            this.tabAxle1.Controls.Add(this.formsPlot_MotorOne);
+            this.tabAxle1.Controls.Add(this.groupBox_MotorOne);
+            this.tabAxle1.Location = new System.Drawing.Point(4, 22);
+            this.tabAxle1.Name = "tabAxle1";
+            this.tabAxle1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAxle1.Size = new System.Drawing.Size(1029, 462);
+            this.tabAxle1.TabIndex = 0;
+            this.tabAxle1.Text = "AXLE 1";
+            this.tabAxle1.UseVisualStyleBackColor = true;
+            // 
+            // tabAxle2
+            // 
+            this.tabAxle2.Controls.Add(this.groupBox_MotorTwo);
+            this.tabAxle2.Location = new System.Drawing.Point(4, 22);
+            this.tabAxle2.Name = "tabAxle2";
+            this.tabAxle2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAxle2.Size = new System.Drawing.Size(1029, 462);
+            this.tabAxle2.TabIndex = 1;
+            this.tabAxle2.Text = "AXLE 2";
+            this.tabAxle2.UseVisualStyleBackColor = true;
+            // 
+            // tabAxle3
+            // 
+            this.tabAxle3.Controls.Add(this.groupBox_MotorThree);
+            this.tabAxle3.Location = new System.Drawing.Point(4, 22);
+            this.tabAxle3.Name = "tabAxle3";
+            this.tabAxle3.Size = new System.Drawing.Size(1029, 462);
+            this.tabAxle3.TabIndex = 2;
+            this.tabAxle3.Text = "AXLE 3";
+            this.tabAxle3.UseVisualStyleBackColor = true;
+            // 
+            // formsPlot_MotorOne
+            // 
+            this.formsPlot_MotorOne.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.formsPlot_MotorOne.Location = new System.Drawing.Point(380, 21);
+            this.formsPlot_MotorOne.Name = "formsPlot_MotorOne";
+            this.formsPlot_MotorOne.Size = new System.Drawing.Size(643, 435);
+            this.formsPlot_MotorOne.TabIndex = 56;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.checkBox_SpeedMotorOne);
+            this.groupBox1.Controls.Add(this.checkBox_TempMotorOne);
+            this.groupBox1.Controls.Add(this.checkBox_CurrentMotorOne);
+            this.groupBox1.Controls.Add(this.checkBox_PositionMotorOne);
+            this.groupBox1.Location = new System.Drawing.Point(20, 377);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(191, 68);
+            this.groupBox1.TabIndex = 57;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Show Plot";
+            // 
+            // checkBox_PositionMotorOne
+            // 
+            this.checkBox_PositionMotorOne.AutoSize = true;
+            this.checkBox_PositionMotorOne.Checked = true;
+            this.checkBox_PositionMotorOne.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_PositionMotorOne.Location = new System.Drawing.Point(13, 19);
+            this.checkBox_PositionMotorOne.Name = "checkBox_PositionMotorOne";
+            this.checkBox_PositionMotorOne.Size = new System.Drawing.Size(63, 17);
+            this.checkBox_PositionMotorOne.TabIndex = 0;
+            this.checkBox_PositionMotorOne.Text = "Position";
+            this.checkBox_PositionMotorOne.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_SpeedMotorOne
+            // 
+            this.checkBox_SpeedMotorOne.AutoSize = true;
+            this.checkBox_SpeedMotorOne.Checked = true;
+            this.checkBox_SpeedMotorOne.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_SpeedMotorOne.Location = new System.Drawing.Point(13, 42);
+            this.checkBox_SpeedMotorOne.Name = "checkBox_SpeedMotorOne";
+            this.checkBox_SpeedMotorOne.Size = new System.Drawing.Size(57, 17);
+            this.checkBox_SpeedMotorOne.TabIndex = 0;
+            this.checkBox_SpeedMotorOne.Text = "Speed";
+            this.checkBox_SpeedMotorOne.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_CurrentMotorOne
+            // 
+            this.checkBox_CurrentMotorOne.AutoSize = true;
+            this.checkBox_CurrentMotorOne.Checked = true;
+            this.checkBox_CurrentMotorOne.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_CurrentMotorOne.Location = new System.Drawing.Point(82, 19);
+            this.checkBox_CurrentMotorOne.Name = "checkBox_CurrentMotorOne";
+            this.checkBox_CurrentMotorOne.Size = new System.Drawing.Size(60, 17);
+            this.checkBox_CurrentMotorOne.TabIndex = 0;
+            this.checkBox_CurrentMotorOne.Text = "Current";
+            this.checkBox_CurrentMotorOne.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_TempMotorOne
+            // 
+            this.checkBox_TempMotorOne.AutoSize = true;
+            this.checkBox_TempMotorOne.Checked = true;
+            this.checkBox_TempMotorOne.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_TempMotorOne.Location = new System.Drawing.Point(82, 42);
+            this.checkBox_TempMotorOne.Name = "checkBox_TempMotorOne";
+            this.checkBox_TempMotorOne.Size = new System.Drawing.Size(86, 17);
+            this.checkBox_TempMotorOne.TabIndex = 0;
+            this.checkBox_TempMotorOne.Text = "Temperature";
+            this.checkBox_TempMotorOne.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_plotPauseOne
+            // 
+            this.checkBox_plotPauseOne.AutoSize = true;
+            this.checkBox_plotPauseOne.Location = new System.Drawing.Point(442, 21);
+            this.checkBox_plotPauseOne.Name = "checkBox_plotPauseOne";
+            this.checkBox_plotPauseOne.Size = new System.Drawing.Size(55, 17);
+            this.checkBox_plotPauseOne.TabIndex = 58;
+            this.checkBox_plotPauseOne.Text = "pause";
+            this.checkBox_plotPauseOne.UseVisualStyleBackColor = true;
+            // 
+            // button_clearPlotOne
+            // 
+            this.button_clearPlotOne.Location = new System.Drawing.Point(227, 382);
+            this.button_clearPlotOne.Name = "button_clearPlotOne";
+            this.button_clearPlotOne.Size = new System.Drawing.Size(127, 31);
+            this.button_clearPlotOne.TabIndex = 59;
+            this.button_clearPlotOne.Text = "Clear Graph";
+            this.button_clearPlotOne.UseVisualStyleBackColor = true;
+            this.button_clearPlotOne.Click += new System.EventHandler(this.button_clearPlotOne_Click);
+            // 
             // SimpleTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1139, 501);
-            this.Controls.Add(this.groupBox_MotorThree);
-            this.Controls.Add(this.groupBox_MotorTwo);
-            this.Controls.Add(this.groupBox_MotorOne);
+            this.ClientSize = new System.Drawing.Size(1061, 595);
+            this.Controls.Add(this.tabMain);
             this.Controls.Add(this.groupBox_connection);
             this.Name = "SimpleTest";
             this.Text = "Form1";
@@ -908,6 +1075,13 @@ namespace SimpleUI
             this.groupBox_MotorThree.PerformLayout();
             this.groupBox_ProfileVelocityThree.ResumeLayout(false);
             this.groupBox_ProfileVelocityThree.PerformLayout();
+            this.tabMain.ResumeLayout(false);
+            this.tabAxle1.ResumeLayout(false);
+            this.tabAxle1.PerformLayout();
+            this.tabAxle2.ResumeLayout(false);
+            this.tabAxle3.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -988,6 +1162,19 @@ namespace SimpleUI
         private System.Windows.Forms.Button button_EnableMotorThree;
         private System.Windows.Forms.Button button_SwitchOnMotorThree;
         private System.Windows.Forms.Button button_ReadyMotorThree;
+        private System.Windows.Forms.TabControl tabMain;
+        private System.Windows.Forms.TabPage tabAxle1;
+        private System.Windows.Forms.TabPage tabAxle2;
+        private System.Windows.Forms.TabPage tabAxle3;
+        private System.Windows.Forms.Label label_temperatureMotorOne;
+        private ScottPlot.FormsPlot formsPlot_MotorOne;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBox_PositionMotorOne;
+        private System.Windows.Forms.CheckBox checkBox_SpeedMotorOne;
+        private System.Windows.Forms.CheckBox checkBox_CurrentMotorOne;
+        private System.Windows.Forms.CheckBox checkBox_TempMotorOne;
+        private System.Windows.Forms.CheckBox checkBox_plotPauseOne;
+        private System.Windows.Forms.Button button_clearPlotOne;
     }
 }
 

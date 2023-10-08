@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleUI", "SimpleUI\Simple
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "can_hw", "can_hw\can_hw.csproj", "{AA32BB32-5803-4D2D-96C7-3341224AE265}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "CiA-402-Test", "CiA-402-Test\CiA-402-Test.vdproj", "{20506E75-2E86-469B-86DD-F31DED5B1D01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{AA32BB32-5803-4D2D-96C7-3341224AE265}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AA32BB32-5803-4D2D-96C7-3341224AE265}.Release|x64.ActiveCfg = Release|x64
 		{AA32BB32-5803-4D2D-96C7-3341224AE265}.Release|x64.Build.0 = Release|x64
+		{20506E75-2E86-469B-86DD-F31DED5B1D01}.Debug|Any CPU.ActiveCfg = Debug
+		{20506E75-2E86-469B-86DD-F31DED5B1D01}.Debug|x64.ActiveCfg = Debug
+		{20506E75-2E86-469B-86DD-F31DED5B1D01}.Release|Any CPU.ActiveCfg = Release
+		{20506E75-2E86-469B-86DD-F31DED5B1D01}.Release|x64.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

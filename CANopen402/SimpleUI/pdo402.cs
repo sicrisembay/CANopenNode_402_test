@@ -36,7 +36,8 @@ namespace SimpleUI
     public enum MODE_OF_OPERATION : sbyte
     {
         RESERVED = 0x00,
-        PROFILE_VELOCITY = 0x03
+        PROFILE_VELOCITY = 0x03,
+        TORQUE_PROFILE = 0x04
     }
 
     public class TimeValuePair
@@ -86,16 +87,21 @@ namespace SimpleUI
         private UInt16 controlStatus;
         private UInt16 statusWord;
         public byte mode { get; private set; }
+        public UInt32 manufacturerStatusRegister { get; private set; }
         public Int32 PositionActualValue { get; private set; }
         public Int32 VelocityActualValue { get; private set; }
-        public Int16 TorqueActualValue { get; private set; }
-        public Int16 CurrentActualValue { get; private set; }
+        public double TorqueActualValue { get; private set; }
+        public double CurrentActualValue { get; private set; }
         public UInt32 DcLinkCircuitVoltage { get; private set; }
+        public double PhaseVoltageValue { get; private set; }
         public double temperature { get; private set; }
+        private bool firstTemperatureData = true;
         public TimeValuePair position { get; private set; }
         public TimeValuePair speed { get; private set; }
         public TimeValuePair current { get; private set; }
         public TimeValuePair tempC { get; private set; }
+        public TimeValuePair torque { get; private set; }
+        public TimeValuePair phaseVoltage { get; private set; }
 
         #endregion // Member
 
@@ -111,6 +117,8 @@ namespace SimpleUI
             this.speed = new TimeValuePair();
             this.current = new TimeValuePair();
             this.tempC = new TimeValuePair();
+            this.torque = new TimeValuePair();
+            this.phaseVoltage = new TimeValuePair();
         }
         public void SetDevice(ref ni_usb device)
         {
@@ -241,6 +249,7 @@ namespace SimpleUI
                             this.statusWord = BitConverter.ToUInt16(e.data, 0);
                             this.updateState();
                             this.mode = e.data[2];
+                            this.manufacturerStatusRegister = BitConverter.ToUInt32(e.data, 3);
                             break;
                         }
                         case 3: {
@@ -260,15 +269,24 @@ namespace SimpleUI
                         case 5: {
                             this.statusWord = BitConverter.ToUInt16(e.data, 0);
                             this.updateState();
-                            this.TorqueActualValue = BitConverter.ToInt16(e.data, 2);
+                            this.TorqueActualValue = Convert.ToDouble(BitConverter.ToInt16(e.data, 2)) / 32768.0; // Per-unit
+                            this.torque.Add(DateTime.Now, this.TorqueActualValue);
+                            this.PhaseVoltageValue = Convert.ToDouble(BitConverter.ToInt16(e.data, 4)) / 32768.0;
+                            this.phaseVoltage.Add(DateTime.Now, this.PhaseVoltageValue);
                             break;
                         }
                         case 8: {
-                            this.temperature = Convert.ToDouble(BitConverter.ToUInt16(e.data, 0)) / 10.0;
-                            this.CurrentActualValue = BitConverter.ToInt16(e.data, 2);
+                            double rawTemp = Convert.ToDouble(BitConverter.ToUInt16(e.data, 0)) / 10.0;
+                            if (this.firstTemperatureData) {
+                                this.temperature = rawTemp;
+                                this.firstTemperatureData = false;
+                            } else {
+                                this.temperature = ( rawTemp * 0.01 ) + ( this.temperature * 0.99 );
+                            }
+                            this.CurrentActualValue = Convert.ToDouble(BitConverter.ToInt16(e.data, 2)) / 32768.0; // Per-unit
                             this.DcLinkCircuitVoltage = BitConverter.ToUInt32(e.data, 4);
                             this.tempC.Add(DateTime.Now, Convert.ToDouble(this.temperature));
-                            this.current.Add(DateTime.Now, Convert.ToDouble(this.CurrentActualValue));
+                            this.current.Add(DateTime.Now, this.CurrentActualValue);
                             break;
                         }
                         default: {
@@ -404,6 +422,24 @@ namespace SimpleUI
                 this.pcan.SendStandard(msgId, data);
             } else if (this.nican != null) {
                 this.nican.SendStandard(msgId, data);
+            }
+        }
+
+        public void SetTargetTorque(double targetTorque_pu)
+        {
+            if(Math.Abs(targetTorque_pu) <= 1.0) {
+                Int16 q16TargetTorque = Convert.ToInt16(targetTorque_pu * 32768.0);
+                UInt32 msgId = (UInt32)( this.rpdo_cobId_base + 4 );
+                byte[] controlWordBuf = BitConverter.GetBytes(this.controlStatus);
+                byte[] targetTorqueBuf = BitConverter.GetBytes(q16TargetTorque);
+                byte[] data = new byte[controlWordBuf.Length + targetTorqueBuf.Length];
+                System.Buffer.BlockCopy(controlWordBuf, 0, data, 0, controlWordBuf.Length);
+                System.Buffer.BlockCopy(targetTorqueBuf, 0, data, controlWordBuf.Length, targetTorqueBuf.Length);
+                if(this.pcan != null) {
+                    this.pcan.SendStandard(msgId, data);
+                } else if(this.nican != null) {
+                    this.nican.SendStandard(msgId, data);
+                }
             }
         }
 
